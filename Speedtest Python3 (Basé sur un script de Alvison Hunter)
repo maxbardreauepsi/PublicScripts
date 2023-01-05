@@ -1,13 +1,31 @@
 # ---------------------------------------------------------------------------------------------
-# Description: Build a simple Internet Performance and Network Speed Test Routine
-# Author: Made with ❤️ in Python 3 by Alvison Hunter - September 26th, 2021
-# JavaScript, Python and Web Development tips at: https://bit.ly/3p9hpqj
+# Description: Internet Performance and Network Speed Test With JSON Export
+# Author: BARDREAU Maxime
 # ---------------------------------------------------------------------------------------------
 
 import speedtest 
+import importlib
+import subprocess
+import json
 from time import sleep
 from tqdm import tqdm
 from colorama import Fore, init
+
+def check_module_exists(module_name):
+  try:
+    importlib.import_module(module_name)
+    return True
+  except ImportError:
+    return False
+
+def install_module(module_name):
+  subprocess.run(["pip", "install", module_name])
+
+required_modules = ["speedtest", "tqdm", "colorama"]
+
+for module_name in required_modules:
+  if not check_module_exists(module_name):
+    install_module(module_name)
 
 init(autoreset=True)
 
@@ -36,6 +54,17 @@ dwnl = str(res_dict['download'])[:2] + "." + \
     str(res_dict['download'])[2:4]
 
 upl = str(res_dict['upload'])[:2] + "." + str(res_dict['upload'])[2:4]
+
+# Create a dictionary with the data to save in the JSON file
+data = {
+  "download": round(res_dict["download"] / 10000000, 2),
+  "upload": round(res_dict["upload"] / 10000000, 2),
+  "ping": res_dict["ping"]
+}
+
+# Save the data in the JSON file
+with open("results.json", "w") as f:
+  json.dump(data, f)
 
 # Display results in a nice looking table using colorama features
 print("")
